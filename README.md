@@ -40,5 +40,7 @@ Follow ".\offline_rpn_weights\README.md" and ".\pretrained_ckpt\regionclip\READM
     bash voc10-5-5.sh
     ```
 
-    
+  
+  
 
+Note that the comm.py, rpn.py, proposal_utils.py and batch_norm.py are modified version based on the [Release v0.3 · facebookresearch/detectron2 (github.com)](https://github.com/facebookresearch/detectron2/releases/tag/v0.3)
