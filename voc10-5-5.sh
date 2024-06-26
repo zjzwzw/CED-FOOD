@@ -11,9 +11,9 @@ BB_RPN_WEIGHTS='./offline_rpn_weights/VOC10-5-5_Percept.pth'
 CONCEPT_TXT='./concepts/concepts_voc.txt'
 
 # ------------------------------- Base Pre-train ---------------------------------- #
-#python main.py --num-gpus 1 --config-file configs/CED_configs/${EXP_NAME}/CLIP_fast_rcnn_R_50_C4_ovd.yaml --opts OUTPUT_DIR ${SAVE_DIR}/food_r50_voc_base \
-#MODEL.WEIGHTS ${IMAGENET_PRETRAIN} MODEL.CLIP.BASE_TRAIN True MODEL.CLIP.OFFLINE_RPN_CONFIG ${OFFLINE_RPN_CONFIG} \
-#MODEL.CLIP.BB_RPN_WEIGHTS ${BB_RPN_WEIGHTS} MODEL.CLIP.CONCEPT_TXT ${CONCEPT_TXT}
+python main.py --num-gpus 1 --config-file configs/CED_configs/${EXP_NAME}/CLIP_fast_rcnn_R_50_C4_ovd.yaml --opts OUTPUT_DIR ${SAVE_DIR}/food_r50_voc_base \
+MODEL.WEIGHTS ${IMAGENET_PRETRAIN} MODEL.CLIP.BASE_TRAIN True MODEL.CLIP.OFFLINE_RPN_CONFIG ${OFFLINE_RPN_CONFIG} \
+MODEL.CLIP.BB_RPN_WEIGHTS ${BB_RPN_WEIGHTS} MODEL.CLIP.CONCEPT_TXT ${CONCEPT_TXT}
 #
 
 
