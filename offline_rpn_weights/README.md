@@ -1,0 +1,1 @@
+Download VOC10-5-5_Percept.pth and VOC-COCO_Percept.pth from [percept_rpn](https://drive.google.com/drive/folders/1GQXHwcPLP7ukTciHts4C4fivFx6fPxs9) under this folder.

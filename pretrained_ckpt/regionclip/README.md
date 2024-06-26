@@ -1,0 +1,1 @@
+Download regionclip_pretrained-cc_rn50.pth from [regionclip](https://drive.google.com/drive/folders/1YTiJJ4sAqHGj-_viiUyuADOdvlHsoub9) under this folder.
