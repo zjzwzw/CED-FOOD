@@ -1,0 +1,40 @@
+aeroplane
+bicycle
+bird
+boat
+bottle
+bus
+car
+cat
+chair
+cow
+diningtable
+dog
+horse
+mortorbike
+person
+pottedplant
+sheep
+sofa
+train
+tvmonitor
+truck
+traffic light
+fire hydrant
+stop sign
+parking meter
+bench
+elephant
+bear
+zebra
+giraffe
+backpack
+umbrella
+handbag
+tie
+suitcase
+microwave
+oven
+toaster
+sink
+refrigerator
