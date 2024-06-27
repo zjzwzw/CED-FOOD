@@ -20,7 +20,6 @@ from detectron2.utils.events import get_event_storage
 from detectron2.utils.logger import log_first_n
 
 from tools.clip_prompt_utils import pre_tokenize, tokenize
-from .gdl import AffineLayer, decouple_layer
 from ..backbone import Backbone, build_backbone
 from detectron2.modeling.postprocessing import detector_postprocess
 from detectron2.modeling.proposal_generator import build_proposal_generator
@@ -206,11 +205,6 @@ class CLIPFastRCNN(nn.Module):
 
         self.judge = False
 
-        ####
-
-        # self._SHAPE_ = self.offline_backbone.output_shape()
-        # self.affine_rpn = AffineLayer(num_channels=self._SHAPE_['res4'].channels, bias=True)
-
 
     @classmethod
     def from_config(cls, cfg):
@@ -326,10 +320,6 @@ class CLIPFastRCNN(nn.Module):
                     self.offline_proposal_generator.eval()
                 images = self.offline_preprocess_image(batched_inputs)
                 features = self.offline_backbone(images.tensor)
-                #####
-                # scale = 0.0
-                # features_de_rpn = {k: self.affine_rpn(decouple_layer(features[k], scale)) for k in features}
-                #####
                 if self.offline_proposal_generator is not None:
                     proposals, _ = self.offline_proposal_generator(images, features, None)
 

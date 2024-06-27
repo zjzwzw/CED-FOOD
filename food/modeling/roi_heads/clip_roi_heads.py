@@ -400,13 +400,6 @@ class CLIPRes5ROIHeads(ROIHeads):
         proposal_boxes = [x.proposal_boxes for x in proposals]
 
 
-        ####
-        # height = batched_input[0].get("height", images.image_sizes[0][0])
-        # width = batched_input[0].get("width", images.image_sizes[0][1])
-        # processed_results = detector_postprocess(proposals[0],height,width)
-        ####
-
-
         box_features = self._shared_roi_transform(
             [features[f] for f in self.in_features], proposal_boxes, res5
         )
@@ -417,294 +410,36 @@ class CLIPRes5ROIHeads(ROIHeads):
             predictions = self.box_predictor(box_features.mean(dim=[2, 3]))
 
         pred_class_logits = predictions[0]
-        # pred_local_logits = predictions[-1]
-        # a = pred_class_logits.max(dim=1)
 
         ####
         if self.training and not self.is_base_train:
             res5.eval()
             res5.zero_grad()
 
-            # logsoftmax = torch.nn.LogSoftmax(dim=-1).cuda()
-            # loss = logsoftmax(pred_class_logits)
-            # loss.sum().backward(retain_graph=True)
 
-            # energy = -torch.logsumexp(pred_class_logits, dim=1)
-            # energy.sum().backward(retain_graph=True)
-            # a,b = pred_class_logits.max(dim=1)
-
-            # min_score = -pred_class_logits[:-2：-1：].max(dim=1)[0]
-            # min_score = -pred_class_logits[:, :self.num_classes - 1].max(dim=1)[0]
-
-            # gt = torch.cat([x.gt_classes for x in proposals])
-            # logit = pred_class_logits[torch.arange(pred_class_logits.size(0)), gt]
-            # logit.sum().backward(retain_graph = True)
-            # pred_prob = torch.softmax(pred_class_logits,dim=1)
             pred_class_logits[:, :-1].max(dim=1).values.sum().backward(retain_graph=True)
             gradients = [hook.data for hook in hooks]
             gradients = gradients[-1:]
             gradients1 = [torch.where(grad != 0, torch.ones_like(grad), torch.zeros_like(grad)) for grad in gradients]
             gradients2 = [torch.sum(torch.abs(grad),dim=(-1,-2)) for grad in gradients]
 
-            # p = torch.cat(gradients1)
-            # none_zero_mask = p.view(p.size(0),p.size(1), -1).any(dim=2)
-            # res = none_zero_mask.sum(dim=-1)
-
 
             temp = torch.cat(gradients)
-            # temp1 = torch.abs(torch.cat(gradients)).mean(dim=1)
-            # temp = torch.abs(temp).view(temp.shape[0],-1)
             grad_map = torch.abs(temp).view(temp.shape[0], temp.shape[1], -1).mean(dim=1)
 
 
             component = torch.cat(gradients2,dim=1)
-            # square_scores2 = torch.pow(component,2).mean(dim=1)
+
             scores = [grad.sum(dim=(-1,-2)) for grad in gradients1]
             scores = torch.cat(scores, dim=1)
-            # temp = torch.cat([grad.sum(dim=(-1,-2)) for grad in gradients1])
-            # temp = temp.view(temp.shape[0],-1)
 
-
-
-
-            # mask = scores ==0
-            # scores = scores[mask]
-            # component = component[mask]
             square_scores = component * scores
-
             square_scores = square_scores.mean(dim=-1)
-
-
-
             gt_classes = torch.cat([x.gt_classes for x in proposals]).cpu()
-            # mask = torch.isin(gt_classes, torch.tensor(list(range(10,15))))
-            # square_scores[mask] = 1e-8
 
-            # objectness_logits = [x.objectness_logits for x in proposals]
-            # objectness = torch.sigmoid(torch.cat(objectness_logits))
-            # objectness = torch.cat(objectness_logits)
-            # square_scores = square_scores*objectness
-
-            # mask_obj = objectness > 1.0
-            # square_scores_ = square_scores[mask_obj]
-            # square_scores_min = square_scores_min[mask_obj]
-            # gt_classes_ = gt_classes[mask_obj]
-            # temp_ = temp[mask_obj]
-            # x_local = x_local[mask_obj]
-
-
-
-
-            ### hot image
-            # gt_boxes = processed_results.proposal_boxes.tensor.cpu().detach().numpy()
-            # fg_inds = gt_classes != self.num_classes
-            # bg_inds = gt_classes == self.num_classes
-            # fg_temp1 = temp1[fg_inds]
-            # # fg_square_scores_min = square_scores_min[fg_inds]
-            # bg_temp1 = temp1[bg_inds]
-            # # bg_square_scores_min = square_scores_min[bg_inds]
-            #
-            # fg_gt = gt_classes[fg_inds]
-            # kn_ids = fg_gt != self.num_classes-1
-            # kn_temp1 = fg_temp1[kn_ids]
-            # un_temp1 = fg_temp1[~kn_ids]
-            # sample_indices = torch.randperm(bg_temp1.size(0))[:kn_temp1.size(0)]
-            # bg_temp1 = bg_temp1[sample_indices]
-            #
-            # a = kn_temp1.cpu()
-            # b = un_temp1.cpu()
-            # c = bg_temp1.cpu()
-            # if self.qa.shape[0] == 0:
-            #     self.qa = a.detach().numpy()
-            #     self.qb = b.detach().numpy()
-            #     self.qc = c.detach().numpy()
-            # else:
-            #     self.qa = np.concatenate((self.qa, a.detach().numpy()))
-            #     self.qb = np.concatenate((self.qb, b.detach().numpy()))
-            #     self.qc = np.concatenate((self.qc, c.detach().numpy()))
-            # self.id += 1
-            # # for i in range(temp1.shape[0]):
-            # if self.id % 250 == 0:
-            #     # if gt_classes[i] != self.num_classes:
-            #     #     continue
-            #     feature_map_kn = np.mean(self.qa, axis=0)
-            #     feature_map_un = np.mean(self.qb, axis=0)
-            #     feature_map_bg = np.mean(self.qc, axis=0)
-            #     fig, axs = plt.subplots(1,3,figsize=(18,6))
-            #     # 将特征图转换为图像格式
-            #     # image = feature_map.mean(dim=0).cpu().detach().numpy()
-            #     # visualizer3 = Visualizer(img[:,:,::-1], metadata=None, scale=1.0)
-            #     # output_image3 = visualizer3.draw_box(gt_boxes[i], edge_color='g')
-            #     # cv2.imshow("image", output_image3.get_image()[:, :, ::-1])
-            #     # cv2.waitKey(0)
-            #     # cv2.destroyAllWindows()
-            #     # print(gt_classes[i])
-            #     # 显示图像
-            #     # plt.figure(figsize=(8,6))
-            #     sns.heatmap(feature_map_kn, annot=True,fmt=".1e", cmap='viridis', ax=axs[0])
-            #     axs[0].set_title('known')
-            #     sns.heatmap(feature_map_un, annot=True, fmt=".1e", cmap='viridis', ax=axs[1])
-            #     axs[1].set_title('unknown')
-            #     sns.heatmap(feature_map_bg, annot=True, fmt=".1e", cmap='viridis', ax=axs[2])
-            #     axs[2].set_title('background')
-            #     # plt.imshow(image, cmap='hot', interpolation='nearest')
-            #     # plt.colorbar()
-            #     # plt.title('Visualization of Feature Map')
-            #     plt.tight_layout()
-            #     plt.show()
-
-
-            ### grad hist
-            # bg_inds = gt_classes == self.num_classes
-            # temp_bg = temp[bg_inds]
-            # # for i in range(temp_.shape[0]):
-            # #     mask = temp_bg[i] != 0
-            # #     t = temp_bg[i][mask]
-            # #     self.qz = np.concatenate((self.qz, t.cpu().detach().numpy()))
-            #
-            # for i in range(temp_.shape[0]):
-            #     # mask = temp_[i] != 0
-            #     if gt_classes_[i]!=self.num_classes-1:
-            #         if self.num_k - self.num_u > 1:
-            #             continue
-            #         t = temp_[i]
-            #         # percent = torch.kthvalue(t,int(len(t)*0.99)).values
-            #         # s = t[t>percent]
-            #         self.qx = np.concatenate((self.qx, t.cpu().detach().numpy()))
-            #         self.num_k+=1
-            #     else:
-            #         if self.num_u - self.num_k > 1:
-            #             continue
-            #         t = temp_[i]
-            #         # percent = torch.kthvalue(t, int(len(t) * 0.99)).values
-            #         # s = t[t > percent]
-            #         self.qy = np.concatenate((self.qy, t.cpu().detach().numpy()))
-            #         self.num_u+=1
-            # self.id += 1
-            # if self.id % 50 == 0:
-            #     fig, axs = plt.subplots(3, 1, figsize=(12, 6), sharex=False)
-            #     axs[0].hist(self.qx, bins=50, color='blue', alpha=0.8)
-            #     axs[0].set_title('known')
-            #     axs[1].hist(self.qy, bins=50, color='orange', alpha=0.8)
-            #     axs[1].set_title('unknown')
-            #     axs[2].hist(self.qz, bins=50, color='g', alpha=0.8)
-            #     axs[2].set_title('BG')
-            #     plt.xlabel('Values')
-            #     plt.ylabel('Frequency')
-            #     plt.tight_layout()
-            #     plt.show(block=True)
-
-
-
-            ## component * scores hist
-            # fg_inds = gt_classes != self.num_classes
-            # bg_inds = gt_classes == self.num_classes
-            # fg_square_scores = square_scores[fg_inds]
-            # # fg_square_scores_min = square_scores_min[fg_inds]
-            # bg_square_scores = square_scores[bg_inds]
-            # # bg_square_scores_min = square_scores_min[bg_inds]
-            #
-            # fg_gt = gt_classes[fg_inds]
-            # kn_ids = fg_gt != self.num_classes-1
-            # kn_square = fg_square_scores[kn_ids]
-            # un_square = fg_square_scores[~kn_ids]
-            # sample_indices = torch.randperm(bg_square_scores.size(0))[:kn_square.size(0)]
-            # bg_square_scores = bg_square_scores[sample_indices]
-            #
-            # a = kn_square.cpu()
-            # b = un_square.cpu()
-            # c = bg_square_scores.cpu()
-            # self.qa = np.concatenate((self.qa, a.detach().numpy()))
-            # self.qb = np.concatenate((self.qb, b.detach().numpy()))
-            # self.qc = np.concatenate((self.qc, c.detach().numpy()))
-            #
-            #
-            # self.id+=1
-            # if self.id % 100 ==0:
-            #     # plt.figure(figsize=(6,8))
-            #     # plt.subplot(311)
-            #     # plt.hist(self.qa, bins=200, color='blue', alpha=0.8, label='known')
-            #     # plt.xlabel('Values')
-            #     # plt.ylabel('Frequency')
-            #     # plt.legend()
-            #     # plt.subplot(313)
-            #     # plt.hist(self.qb, bins=200, color='orange', alpha=0.8, label='unknown')
-            #     # plt.xlabel('Values')
-            #     # plt.ylabel('Frequency')
-            #     # plt.legend()
-            #     # plt.subplot(312)
-            #     # plt.hist(self.qc, bins=200, color='g', alpha=0.8, label='BG')
-            #     # if self.qa.size(0)>self.qb.size(0)
-            #     print(self.qa.var())
-            #     print(self.qb.var())
-            #     print(self.qc.var())
-            #     qa = self.qa
-            #     qc = self.qc
-            #     if self.qb.shape[0]<self.qa.shape[0]:
-            #         qa = np.random.choice(self.qa,size=self.qb.shape[0],replace=False)
-            #         qc = np.random.choice(self.qc, size=self.qb.shape[0], replace=False)
-            #     dfa = pd.Series(qa)
-            #     qb = self.qb
-            #     # if self.qa.shape[0]<self.qb.shape[0]:
-            #     #     qb = np.random.choice(self.qb,size=self.qa.shape[0],replace=False)
-            #     dfb = pd.Series(self.qb)
-            #     dfc = pd.Series(qc)
-            #
-            #     h1, bins = np.histogram(self.qa, bins=30)
-            #     h2, _ = np.histogram(qb, bins=bins)
-            #     intersection = np.minimum(h1,h2).sum()
-            #     print(intersection)
-            #
-            #
-            #     sns.set(style="darkgrid")
-            #     sns.histplot(data=dfa, color="blue",alpha=0.5, label="known",bins=30 ,kde=True)
-            #     sns.histplot(data=dfb, color="orange",alpha=0.5, label="unknown",bins=30, kde=True)
-            #     sns.histplot(data=dfc, color="green",alpha=0.5, label="background",bins=30, kde=True)
-            #     plt.xlabel('Aggregated Gradient')
-            #     plt.ylabel('Frequency')
-            #     plt.legend()
-            #     plt.show(block=True)
-
-                # fig ,axs = plt.subplots(3,1,figsize=(6,6),sharex=True)
-                # axs[0].hist(self.qa, bins=50, color='blue', alpha=0.8)
-                # axs[0].set_title('known')
-                # axs[2].hist(self.qb, bins=50, color='orange', alpha=0.8)
-                # axs[2].set_title('unknown')
-                # axs[1].hist(self.qc, bins=50, color='g', alpha=0.8)
-                # axs[1].set_title('background')
-                # plt.xlabel('Values')
-                # plt.ylabel('Frequency')
-                # plt.tight_layout()
-                #
-                # plt.show(block=True)
-
-
-            # boxes_fg = processed_results.proposal_boxes[fg_inds].tensor.cpu().detach().numpy()
-            # boxes_bg = processed_results.proposal_boxes[~fg_inds].tensor.cpu().detach().numpy()
-            #
-            # fg, pos_inds = fg_square_scores.topk(3)
-            # bg, neg_inds = bg_square_scores.topk(3)
-            # boxes_fg = boxes_fg[pos_inds.cpu()]
-            # boxes_bg = boxes_bg[neg_inds.cpu()]
-            #
-            # visualizer3 = Visualizer(img[:,:,::-1], metadata=None, scale=1.0)
-            # for box in boxes_fg:
-            #     output_image3 = visualizer3.draw_box(box, edge_color='g')
-            #
-            # cv2.imshow("image", output_image3.get_image()[:, :, ::-1])
-            # cv2.waitKey(0)
-            # cv2.destroyAllWindows()
-            #
-            # visualizer4 = Visualizer(img[:, :, ::-1], metadata=None, scale=1.0)
-            # for box in boxes_bg:
-            #     output_image4 = visualizer4.draw_box(box, edge_color='r')
-            #
-            # cv2.imshow("image", output_image4.get_image()[:, :, ::-1])
-            # cv2.waitKey(0)
-            # cv2.destroyAllWindows()
 
             square_scores = square_scores.clone().detach()
-            ####
+
             res5.train()
             ####
             ious = torch.cat([x.iou for x in proposals])
@@ -750,32 +485,6 @@ class CLIPRes5ROIHeads(ROIHeads):
             cat_ious = torch.cat((fg_iou, bg_iou), dim=0)
             cat_grad_map = torch.cat((fg_grad_map, bg_grad_map), dim=0)
             cat_scores = torch.cat((fg_scores, bg_scores), dim=0)
-
-            # grad = cat_grad_map[fg_labels.size(0):,:-1].contiguous().view(-1)
-            # mask = grad > 0.0002
-            # count = torch.sum(mask)
-            # self.count += count
-            # probs = cat_local_scores[:fg_labels.size(0),:-1,:].contiguous().view(-1, self.num_classes+1)[:, :10].softmax(dim=-1)
-            # entropy = -torch.sum(probs*torch.log2(probs),dim=-1) / torch.log2(torch.tensor(10))
-            #
-            # if self.x_np.shape[0] == 0:
-            #     self.x_np = grad.cpu().detach().numpy()
-            #     self.y_np = entropy.cpu().detach().numpy()
-            #
-            # else:01
-            #     self.x_np = np.concatenate((self.x_np, grad.cpu().detach().numpy()))
-            #     self.y_np = np.concatenate((self.y_np, entropy.cpu().detach().numpy()))
-            # self.id += 1
-            # # x_np = np.array(grad.cpu().detach())
-            # # y_np = np.array(entropy.cpu().detach())
-            # if self.id %20 ==0:
-            #     print(self.count)
-            #     plt.scatter(self.x_np, self.y_np)
-            #     plt.title('Background Scatter')
-            #     plt.xlabel('Absolute Gradient')
-            #     plt.ylabel('Normalized Entropy')
-            #     plt.show()
-
             cat_feat = (cat_local_scores, cat_labels, cat_ious, cat_grad_map, cat_scores)
 
         ###
