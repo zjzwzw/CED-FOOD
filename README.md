@@ -2,6 +2,8 @@
 
 [[2406.18443\] Unveiling the Unknown: Conditional Evidence Decoupling for Unknown Rejection (arxiv.org)](https://arxiv.org/abs/2406.18443)
 
+![visualized](visualized.png)
+
 - ## **Installation**
 
 ```bash
