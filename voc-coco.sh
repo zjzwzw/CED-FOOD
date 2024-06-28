@@ -22,7 +22,7 @@ BASE_WEIGHT=${SAVE_DIR}/food_r50_voc_coco_base/'model_final.pth'
 ## --> 2. TFA-like, i.e. run seed0~9 for robust results (G-FSOD, 80 classes)
 for seed in 1 2 3 4 5 6 7 8 9 10
 do
-    for shot in 1  # if final, 10 -> 1 2 3 5 10 30
+    for shot in 1 5 10 30 # if final, 10 -> 1 2 3 5 10 30
     do
         python tools/create_config.py --dataset voc_coco --config_root configs/CED_configs/voc_coco               \
             --shot ${shot} --seed ${seed} --setting 'gfsod'
@@ -30,7 +30,7 @@ do
         OUTPUT_DIR=${SAVE_DIR}/${METHOD_NAME}/3_1_1/${shot}shot_seed${seed}
         python main.py --num-gpus 1 --config-file ${CONFIG_PATH}                            \
             --opts MODEL.WEIGHTS ${BASE_WEIGHT} OUTPUT_DIR ${OUTPUT_DIR} MODEL.CLIP.CONCEPT_TXT ${CONCEPT_TXT} \
-            MODEL.CLIP.BASE_TRAIN True MODEL.CLIP.OFFLINE_RPN_CONFIG ${OFFLINE_RPN_CONFIG} MODEL.CLIP.BB_RPN_WEIGHTS ${BB_RPN_WEIGHTS} \
+            MODEL.CLIP.BASE_TRAIN False MODEL.CLIP.OFFLINE_RPN_CONFIG ${OFFLINE_RPN_CONFIG} MODEL.CLIP.BB_RPN_WEIGHTS ${BB_RPN_WEIGHTS} \
              UPLOSS.TOPK 3 UPLOSS.SAMPLING_RATIO 1 UPLOSS.TOPM 1
         rm ${CONFIG_PATH}
         rm ${OUTPUT_DIR}/model_final.pth
