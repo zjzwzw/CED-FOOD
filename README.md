@@ -1,5 +1,10 @@
 # Conditional-Evidence-Decoupling-FOOD
 
+[Few-Shot Open-Set Object Detection via Conditional Evidence Decoupling](https://arxiv.org/abs/2406.18443 "Few-Shot Open-Set Object Detection via Conditional Evidence Decoupling")
+
+Few-shot Open-set Object Detection (FOOD) poses a significant challenge in real-world scenarios. It aims to train an open-set detector under the condition of scarce training samples, which can detect known objects while rejecting unknowns. Under this challenging scenario, the decision boundaries of unknowns are difficult to learn and often ambiguous. To mitigate this issue, we develop a two-stage open-set object detection framework with prompt learning, which delves into conditional evidence decoupling for the unknown rejection. Specifically, we propose an Attribution-Gradient-based Pseudo-unknown Mining (AGPM) method to select region proposals with high uncertainty, which leverages the discrepancy in attribution gradients between known and unknown classes, alleviating the inadequate unknown distribution coverage of training data. Subsequently, we decouple known and unknown properties in pseudo-unknown samples to learn distinct knowledge with proposed Conditional Evidence Decoupling (CED), which enhances separability between knowns and unknowns. Additionally, we adjust the output probability distribution through Abnormal Distribution Calibration (ADC), which serves as a regularization term to establish robust decision boundaries for the unknown rejection. Our method has achieved superior performance over previous state-of-the-art approaches, improving the mean recall of unknown class by 7.24% across all shots in VOC10-5-5 dataset settings and 1.38% in VOC-COCO dataset settings.
+
+- ## **Visualization**
 
 ![visualized](visualized.png)
 
