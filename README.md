@@ -32,6 +32,8 @@ same as [HSIC-based Moving WeightAveraging for Few-Shot Open-Set Object Detectio
 
 Follow ".\offline_rpn_weights\README.md" and ".\pretrained_ckpt\regionclip\README.md" to prepare pretrained models.
 
+We provide the model weights after base training stage for reference: https://drive.google.com/drive/folders/1nOvFAAHbxgdHRHe2-jyxngTk83VdaSNS?usp=drive_link
+
 - ## Running
 
   - ##### VOC-COCO dataset settings:
